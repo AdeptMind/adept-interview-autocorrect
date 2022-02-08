@@ -72,6 +72,16 @@ def train(train_path: str = QUERIES_PATH, model_path: str = MODEL_PATH):
 
 
 def evaluate(test_path: str = QUERIES_PATH, model_path: str = MODEL_PATH):
+    # TODO: implement and print out the following evaluation metrics
+    # accuracy of the top ranked candidate
+    # accuracy of the typo queries subset and the non-typo queries subset
+    # For example, you have 2 queries as follows:
+    # {"Q1": {"Q11": 0, "Q12": 1}, "Q2": {"Q2": 1, "Q21": 0}]
+    # your ranking is as follows
+    # {"Q1": ["Q12", "Q11", "Q1"], "Q2": ["Q21", "Q2"]}
+    # and the accuracy is 0.5
+
+
     item = load_model(model_path)
     model = item['model']  # this is your autocorrect model
     vectorizer = item['vectorizer']  # this is your feature vectorizer
@@ -84,10 +94,6 @@ def evaluate(test_path: str = QUERIES_PATH, model_path: str = MODEL_PATH):
         features = extract_features(query, candidates)
         x = vectorizer.transform(features)
         h = model.predict(x)  # np.array with shape (len(candidates), )
-        # TODO: implement and print out the following evaluation metrics
-        # accuracy of the top ranked candidate
-        # accuracy of the typo queries subset and the non-typo queries subset
-
 
 def predict(model_path: str= MODEL_PATH):
     item = load_model(model_path)
