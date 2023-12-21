@@ -1,0 +1,42 @@
+name: Vulnerability Static Scan
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  vulnerability-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Run Trivy vulnerability scanner
+      run: |
+        docker run --rm -v "${PWD}:/src" -v "${HOME}/.cache/trivy:/root/.cache/trivy" aquasec/trivy fs --severity CRITICAL,HIGH,MEDIUM --format json /src | jq > trivy.json
+
+    - name: Check for vulnerabilities
+      run: |
+        if [ $(jq '.Results | length' trivy.json) -eq 0 ]; then
+          echo "No vulnerabilities found."
+        else
+          echo "Vulnerabilities found:"
+          jq '.Results[] | select(.Vulnerabilities != null)' trivy.json
+          exit 1
+        fi
+
+    - name: Run Semgrep scan
+      run: |
+        docker run --rm -v "${PWD}:/src" returntocorp/semgrep semgrep --config=auto --quiet --json --severity=ERROR > semgrep.json
+
+    - name: Check Semgrep results
+      run: |
+        if [ $(jq '.results | length' semgrep.json) -eq 0 ]; then
+          echo "No Semgrep errors found."
+        else
+          echo "Semgrep errors found:"
+          jq '.results[] | {check_id, path, start, end, extra}' semgrep.json
+          exit 1
+        fi
