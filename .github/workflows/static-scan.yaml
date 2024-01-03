@@ -1,0 +1,8 @@
+name: Vulnerability Static Scan
+on: pull_request
+jobs:
+  vulnerability-scan:
+    uses: "Adeptmind/adept-utils/.github/workflows/static-scan-central.yaml@master"
+    with:
+        ref: ${{ github.event.pull_request.head.ref }}
+        repo: ${{ github.event.pull_request.head.repo.full_name }}
